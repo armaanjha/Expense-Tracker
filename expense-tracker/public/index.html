@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker — Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+
+<div class="auth-card">
+    <h1>💰 Expense Tracker</h1>
+    <p class="subtitle">Track your spending, stay in control.</p>
+
+    <div class="tab-switcher">
+        <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+        <button class="tab-btn" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+        <input type="text" id="login-username" placeholder="Username" />
+        <input type="password" id="login-password" placeholder="Password" />
+        <button class="btn-primary" onclick="login()">Login</button>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" style="display:none;">
+        <input type="text" id="reg-username" placeholder="Choose a username" />
+        <input type="password" id="reg-password" placeholder="Choose a password" />
+        <button class="btn-primary" onclick="register()">Register</button>
+    </div>
+
+    <p id="auth-message" class="message"></p>
+</div>
+
+<script>
+    function switchTab(tab) {
+        document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+        document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+        document.querySelectorAll('.tab-btn').forEach((b, i) => {
+            b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+        });
+        document.getElementById('auth-message').textContent = '';
+    }
+
+    async function login() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        if (!username || !password) return showMsg('Please fill all fields.', 'error');
+
+        const res = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok) window.location.href = '/dashboard';
+        else showMsg(data.error, 'error');
+    }
+
+    async function register() {
+        const username = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value;
+        if (!username || !password) return showMsg('Please fill all fields.', 'error');
+
+        const res = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok) { showMsg(data.message, 'success'); switchTab('login'); }
+        else showMsg(data.error, 'error');
+    }
+
+    function showMsg(msg, type) {
+        const el = document.getElementById('auth-message');
+        el.textContent = msg;
+        el.className = 'message ' + type;
+    }
+</script>
+</body>
+</html>
